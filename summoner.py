@@ -6,28 +6,27 @@ import requests
 
 USER_AGENT = 'summoner <http://github.com/edsu/summoner>'
 
+
 class Summon():
 
     def __init__(self, access_id, secret_key):
-        if access_id == None:
+        if access_id is None:
             raise Exception("access_id must not be None")
-        elif secret_key == None:
+        elif secret_key is None:
             raise Exception("secret_key must not be None")
 
         self.access_id = access_id
         self.secret_key = secret_key
         self.host = 'api.summon.serialssolutions.com'
 
-
     def status(self):
         r = self._get("/2.0.0/search/ping")
         if 'status' in r:
             return r['status']
 
-
     def search(self, q, **kwargs):
         """
-        You can pass in any of the Summon Search API parameters 
+        You can pass in any of the Summon Search API parameters
         (without the "s." prefix). For example to remove highlighting:
 
             result = api.search("Web", hl=False)
@@ -43,7 +42,6 @@ class Summon():
         r = self._get("/2.0.0/search", params)
         return r
 
-
     def _get(self, path, params={}):
         now = datetime.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
         headers = {
@@ -57,7 +55,7 @@ class Summon():
         # generate auth token
         id_str = self._id_string(path, params, headers)
         hash_code = hmac.new(self.secret_key, id_str, hashlib.sha1)
-        hash_code_digest = base64.encodestring(hash_code.digest())
+        hash_code_digest = base64.b64encode(hash_code.digest())
         auth = "Summon %s;%s" % (self.access_id, hash_code_digest)
         headers['Authorization'] = auth
 
@@ -67,7 +65,6 @@ class Summon():
             return response.json()
         else:
             response.raise_for_status()
-
 
     def _id_string(self, path, params, headers):
         if len(params) > 0:
